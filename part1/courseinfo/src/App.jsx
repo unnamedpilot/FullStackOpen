@@ -7,12 +7,20 @@ const Header = (props) => {
   )
 }
 
+const Part = (props) => {
+  return (
+    <>
+    <p>{props.part_name} {props.exercises_amount}</p>
+    </>
+  )
+}
+
 // Content renders the parts and their number of exercises
 const Content = (props) => {
   return(
     <>
       {props.content.map((part) => (
-        <p>{part.part_name} {part.exercises_amount}</p>)
+        <Part part_name={part.part_name} exercises_amount={part.exercises_amount} />)
       )}
     </>
   )
