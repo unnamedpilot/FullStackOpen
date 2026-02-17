@@ -1,38 +1,44 @@
 // Header takes care of rendering the name of the course
-const Header = (props) => {
+const Header = ({title}) => {
   return (
   <>
-    <h1>{props.title}</h1>
+    <h1>{title}</h1>
   </>
   )
 }
 
-const Part = (props) => {
+const Part = ({part_name, exercises_amount}) => {
+  const increaseExerciseAmount = () => exercises_amount+=1
+
   return (
     <>
-    <p>{props.part_name} {props.exercises_amount}</p>
+    <li>{part_name} {exercises_amount}</li>
+    <button onClick={increaseExerciseAmount}>Increase</button>
     </>
   )
 }
 
 // Content renders the parts and their number of exercises
-const Content = (props) => {
+const Content = ({content}) => {
   return(
     <>
-      {props.content.map((part) => (
-        <Part part_name={part.part_name} exercises_amount={part.exercises_amount} />)
-      )}
+      <ul>
+        {content.map(({part_name, exercises_amount}) => 
+        <Part 
+          part_name={part_name} 
+          exercises_amount={exercises_amount}/>)}
+      </ul>
     </>
   )
 }
 
 // Total renders the total number of exercises.
-const Total = (props) => {
-  return(
+const Total = ({content}) => {
+  const total_num = content.reduce((accumulator, {exercises_amount}) => accumulator+exercises_amount, 0)
+
+  return (
     <>
-      <p>
-        Number of exercises {props.content.reduce((accumulator, current) => accumulator + current.exercises_amount, 0)}
-      </p>
+    <p>Number of exercises {total_num}</p>
     </>
   )
 }
@@ -52,7 +58,8 @@ const App = () => {
       {
         part_name : "State of a component", 
         exercises_amount : 14
-      }
+      },
+      
     ]
   }
 
