@@ -1,5 +1,23 @@
 import { useState } from 'react'
 
+const Anecdote = ({title, anecdote, votes, onVote, onNext}) => {
+  return (
+    <div>
+      <h1>{title}</h1>
+      <div>{anecdote}</div>
+      <div>
+        {votes === 0 ? (
+          <>No votes yet</>
+        ) : (
+          <>has {votes} votes</>
+        )}
+      </div>
+      {onVote && <button onClick={onVote}>vote</button>}
+      {onNext && <button onClick={onNext}>next anecdote</button>}
+    </div>
+  )
+}
+
 const App = () => {
   const anecdotes = [
     'If it hurts, do it more often.',
@@ -15,12 +33,15 @@ const App = () => {
   const [selected, setSelected] = useState(0)
   const [votes, setVotes] = useState(Array(anecdotes.length).fill(0))
 
-  const handleNextAnectdote = () => setSelected(Math.floor(Math.random() * anecdotes.length))
+  const handleNextAnecdoteClick = () => setSelected(Math.floor(Math.random() * anecdotes.length))
 
   const handleVoteClick = () => {
-    const votes_copy = [...votes]
-    votes_copy[selected] = votes_copy[selected] + 1
-    setVotes(votes_copy)
+    setVotes(prevVotes => {
+      const votesCopy = [...prevVotes]
+      votesCopy[selected]+=1
+      return votesCopy
+      }
+    )
   }
 
   const getMaxVotesLocation = () => {
@@ -28,20 +49,22 @@ const App = () => {
     return votes.indexOf(max_votes)
   }
 
-  const max_votes_location = getMaxVotesLocation()
+  const maxVotesLocation = getMaxVotesLocation()
 
   return (
-    <div>
-      <h1>Anecdote of the day</h1>
-      <div>{anecdotes[selected]}</div>
-      <div>has {votes[selected]} votes</div>
-      <button onClick={handleVoteClick}>vote</button>
-      <button onClick={handleNextAnectdote}>next anectdote</button>
-
-      <h1>Anecdote with most votes</h1>
-      <div>{anecdotes[max_votes_location]}</div>
-      <div>has {votes[max_votes_location]} votes</div>
-    </div>
+    <>
+      <Anecdote
+      title="Anecdote of the day"
+      anecdote={anecdotes[selected]}
+      votes={votes[selected]}
+      onVote={handleVoteClick}
+      onNext={handleNextAnecdoteClick}/>
+      
+      <Anecdote
+      title="Anecdote with most votes"
+      anecdote={anecdotes[maxVotesLocation]}
+      votes={votes[maxVotesLocation]}/>
+    </>
   )
 }
 
