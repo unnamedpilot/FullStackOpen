@@ -1,33 +1,50 @@
-import {useState} from 'react'
+import { useState } from "react"
 
-const Display = ({counter}) => <><p>{counter}</p></>
-
-const Button = ({onClick, text}) => {
+const History = ({allClicks}) => {
   return (
-    <>
-    <button onClick={onClick}>
-      {text}
-    </button>
-    </>
+    <p>
+      {allClicks.length === 0 ? "the app is used by pressing buttons" : allClicks.join(' ')}
+    </p>
+  )
+}
+
+const Button = ({handleClick, text}) => {
+  return(
+    <button onClick={handleClick}>{text}</button>
   )
 }
 
 
-
 const App = () => {
-  const [counter, setCounter] = useState(0)
-  const increaseByOne = () => setCounter(counter+1)
-  const resetToZero = () => setCounter(0)
-  const decreaseByOne = () => setCounter(counter-1)
+  const [ left, setLeft ] = useState(0)
+  const [ right, setRight ] = useState(0)
+  const [ allClicks, setAllClicks ] = useState([])
+  const [ total, setTotal ] = useState(0)
 
+  const handleRightClick = () => {
+    const updatedRight = right+1
+    setRight(updatedRight)
+    setAllClicks(allClicks.concat('R'))
+    setTotal(updatedRight + left)
+  }
+
+  const handleLeftClick = () => {
+    const updatedLeft = left+1
+    setLeft(updatedLeft)
+    setAllClicks(allClicks.concat('L'))
+    setTotal(right + updatedLeft)
+  }
   return (
     <>
-      <Display counter={counter}/>
-      <Button onClick={increaseByOne} text="Increase"/>
-      <Button onClick={resetToZero} text="Reset"/>
-      <Button onClick={decreaseByOne} text="Decrease"/>
+      {left}
+      <Button handleClick={handleLeftClick} text="left"/>
+      <Button handleClick={handleRightClick} text="right"/>
+      {right}
+      <p>{total}</p>
+      <History allClicks = {allClicks}/>
     </>
   )
+
 }
 
 export default App
