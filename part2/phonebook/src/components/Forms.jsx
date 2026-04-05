@@ -8,7 +8,7 @@ const Forms = ({newName, newNumber, onNameChange, onNumberChange, onSubmitPerson
           name: <input value={newName} onChange={onNameChange} />
         </div>
         <div>
-          number: <input type="number" value={newNumber} onChange={onNumberChange} />
+          number: <input value={newNumber} onChange={onNumberChange} />
         </div>
         <div>
           <button type="submit" onClick={onSubmitPerson}>add</button>

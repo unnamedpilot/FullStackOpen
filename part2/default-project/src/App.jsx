@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import Notes from "./components/Notes"
-import axios from "axios"
+import noteService from "./services/notes"
 
 const App = () => {
   const [ notes, setNotes ] = useState([])
@@ -8,35 +8,49 @@ const App = () => {
   const [ showAll, setShowAll ] = useState(true)
 
   useEffect(() => {
-    console.log("effect")
-    axios
-      .get("http://localhost:3001/notes")
-      .then(response => {
-        console.log("promise fulfilled");
-        setNotes(response.data)})
+    noteService
+      .getAll()
+      .then(data => setNotes(data))
   }, [])
 
-  console.log("render", notes.length, "notes")
   
 
   const addNote = (event) => {
     event.preventDefault()
-    console.log(event.target);
     const newRecord = {
-      id: notes.length + 1,
       content: newNote,
       important: Math.random() < 0.5
     }
-    console.log(newRecord);
     
-    setNotes((prevNotes) => prevNotes.concat(newRecord))
-    setNewNote("")
+    noteService
+      .create(newRecord)
+      .then(data => {
+        setNotes(notes.concat(data))
+        setNewNote("")
+      })
   }
 
   const handleNoteChange = (event) => {
-    console.log(event.target.value)
     setNewNote(event.target.value)
   }
+
+  const toggleImportanceOf = (id) => {
+    const element_address = notes.findIndex((note) => note.id === id)
+    const note = notes[element_address]
+    const changedNote = {...note, important: !note.important}
+    
+    noteService
+    .update(id, changedNote)
+    .then(data => {      
+      setNotes((prevNotes) => prevNotes.map(note => note.id === data.id ? data : note))
+    })
+    .catch(() => {
+      alert(`You can't modify the note with id ${id} because it doesn't exist`)
+      const notesWithoutRejected = notes.filter((note) => note.id != id)
+      setNotes(notesWithoutRejected)
+    })
+  }
+
 
   const notesToShow = showAll 
     ? notes 
@@ -49,7 +63,7 @@ const App = () => {
       <button onClick={() => setShowAll(!showAll)}>
         show {showAll ? "important" : "all"}
       </button>
-      <Notes notes={notesToShow}/>
+      <Notes notes={notesToShow} toggleImportance={toggleImportanceOf}/>
       <form onSubmit={addNote}>
         <input value={newNote} onChange={handleNoteChange}/>
         <button type="submit">submit</button>

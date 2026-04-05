@@ -1,16 +1,31 @@
 
-
-const Notes = ({ notes }) => {
+const Note = ({ note, toggleImportance }) => {
+    
     return (
-        <div>
-            <ul>
+        <tr>
+            <td>
+                {note.content} 
+            </td>
+            <td>
+                <button onClick={toggleImportance}>
+                    Toggle importance
+                </button>
+            </td>
+        </tr>
+    )
+}
+
+const Notes = ({ notes, toggleImportance }) => {    
+    return (
+        <table>
+            <tbody>
                 {notes.map((note) => 
-                    <li key={note.id}>
-                        {note.content}
-                    </li>
-                )}
-            </ul>
-        </div>
+                    <Note 
+                        note={note} 
+                        key={note.id} 
+                        toggleImportance={() => toggleImportance(note.id)}/>)}
+            </tbody>
+        </table>
     )
 }
 
