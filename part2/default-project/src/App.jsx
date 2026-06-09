@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react"
 import Notes from "./components/Notes"
 import noteService from "./services/notes"
+import Notification from "./components/Notification"
+import Footer from "./components/Footer"
 
 const App = () => {
   const [ notes, setNotes ] = useState([])
   const [ newNote, setNewNote ] = useState("...A new note")
   const [ showAll, setShowAll ] = useState(true)
+  const [ errorMessage, setErrorMessage] = useState(null)
 
   useEffect(() => {
     noteService
@@ -42,10 +45,14 @@ const App = () => {
     noteService
     .update(id, changedNote)
     .then(data => {      
-      setNotes((prevNotes) => prevNotes.map(note => note.id === data.id ? data : note))
+      setNotes((prevNotes) => 
+        prevNotes.map(note => 
+          note.id === data.id ? data : note))
     })
     .catch(() => {
-      alert(`You can't modify the note with id ${id} because it doesn't exist`)
+      setErrorMessage(`You can't modify the note with id ${id} because it doesn't exist`)
+
+      setTimeout(() => setErrorMessage(null), 5000)
       const notesWithoutRejected = notes.filter((note) => note.id != id)
       setNotes(notesWithoutRejected)
     })
@@ -60,6 +67,7 @@ const App = () => {
   return (
     <div>
       <h1>Notes</h1>
+      <Notification message = {errorMessage}/>
       <button onClick={() => setShowAll(!showAll)}>
         show {showAll ? "important" : "all"}
       </button>
@@ -68,6 +76,7 @@ const App = () => {
         <input value={newNote} onChange={handleNoteChange}/>
         <button type="submit">submit</button>
       </form>
+      <Footer/>
     </div>
   )
 

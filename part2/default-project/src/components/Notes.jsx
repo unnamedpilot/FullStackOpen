@@ -3,12 +3,12 @@ const Note = ({ note, toggleImportance }) => {
     
     return (
         <tr>
-            <td>
+            <td className="note">
                 {note.content} 
             </td>
             <td>
                 <button onClick={toggleImportance}>
-                    Toggle importance
+                    {note.important ? "make not important" : "make important"}
                 </button>
             </td>
         </tr>
