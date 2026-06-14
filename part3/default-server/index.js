@@ -29,9 +29,8 @@ function generateId(notes) {
 }
 
 app.use(express.json())
-
 app.use(cors({origin: "http://localhost:5173"}))
-
+app.use(express.static("dist"))
 app.use((request, response, next) => {
   console.log("Method: ", request.method)
   console.log("Path: ", request.path)
