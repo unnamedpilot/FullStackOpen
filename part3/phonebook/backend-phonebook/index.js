@@ -66,7 +66,7 @@ app.get("/api/persons/:id", (req, res) => {
     if(person){
         res.json(person)
     }
-    res.status(200).end()
+    res.status(404).end()
 })
 
 app.delete("/api/persons/:id", (req, res) => {
