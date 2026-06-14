@@ -1,3 +1,4 @@
+const cors = require("cors")
 const express = require("express")
 const app = express()
 
@@ -27,9 +28,9 @@ function generateId(notes) {
   return 0
 }
 
-console.log(generateId(notes))
-
 app.use(express.json())
+
+app.use(cors({origin: "http://localhost:5173"}))
 
 app.use((request, response, next) => {
   console.log("Method: ", request.method)
@@ -37,7 +38,6 @@ app.use((request, response, next) => {
   console.log("Body: ", request.body)
   console.log("---")
   next()
-  
 })
 
 app.get("/", (request, response) => response.send("<h1>Hello World</h1>"))
@@ -85,5 +85,5 @@ app.use((request, response) => {
 })
 
 
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => console.log(`The server is running in ${PORT}`))
