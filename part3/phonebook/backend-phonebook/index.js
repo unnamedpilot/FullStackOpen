@@ -79,7 +79,7 @@ app.delete("/api/persons/:id", (req, res) => {
 app.post("/api/persons", (req, res) => {
     const body = req.body
 
-    const id = generateId()
+    
     const name = body.name
     const number = body.number
 
@@ -95,9 +95,10 @@ app.post("/api/persons", (req, res) => {
         })
     }
 
+    const id = generateId()
     const new_person = { id, name, number }
 
-    persons.concat(new_person)
+    persons.push(new_person)
     res.status(201).json(new_person)
 })
 
