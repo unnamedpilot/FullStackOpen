@@ -10,7 +10,7 @@
     "test": "echo \"There is no test script yet\" && exit 1",
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "build:ui": "rm -rf dist && cd ../frontend-tutorial && npm run build && cp -r dist ../default-server",
+    "build:ui": "rm -rf dist && cd ../frontend-tutorial && npm run build && cp -r dist ../backend-tutorial",
     "deploy:full": "npm run build:ui && git add . && git commit -m buildui && git push origin main"
   },
   "dependencies": {
