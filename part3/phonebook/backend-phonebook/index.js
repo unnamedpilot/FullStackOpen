@@ -2,9 +2,10 @@ function generateId() {
     return parseInt(Math.random() * 1000000000000)
 }
 
-
+require("dotenv").config()
 const express = require("express")
 const morgan = require("morgan")
+const Person = require("./models/persons")
 const app = express()
 
 
@@ -49,7 +50,7 @@ let persons = [
 ]
 
 app.get("/api/persons", (req, res) => {
-    res.json(persons)
+    Person.find({}).then(people => res.json(people))
 })
 
 app.get("/info", (req, res) => {
@@ -61,11 +62,13 @@ app.get("/info", (req, res) => {
 
 app.get("/api/persons/:id", (req, res) => {
     const id = req.params.id
-    const person = persons.find((p) => p.id === id)
-    if(person){
-        res.json(person)
-    }
-    res.status(404).end()
+    Person.findById(id).then(person => {
+        if(person) {
+            res.json(person)
+        } else {
+            res.status(404).end()
+        }
+    })
 })
 
 app.delete("/api/persons/:id", (req, res) => {
@@ -78,27 +81,24 @@ app.delete("/api/persons/:id", (req, res) => {
 app.post("/api/persons", (req, res) => {
     const body = req.body
 
-    
+    if(!body || !body.name || !body.number) {
+       return res.status(400).json({error: "body must include name and number"})
+    }
+
     const name = body.name
     const number = body.number
 
-    if (!name || !number) {
-        return res.status(400).json({
-            error: "either name or number is missing"
+
+    Person.findOne({ name }).then(existingPerson => {
+        if (existingPerson) {
+            return res.status(409).json({error: "That name is already registered"})
+        }
+
+        const person = new Person({name, number})
+        person.save().then(savedPerson => {
+            res.status(200).json(savedPerson)
         })
-    }
-
-    if(persons.find((person) => person.name === name)) {
-        return res.status(409).json({
-            error: "name must be unique"
-        })
-    }
-
-    const id = generateId()
-    const new_person = { id, name, number }
-
-    persons.push(new_person)
-    res.status(201).json(new_person)
+    })
 })
 
 
