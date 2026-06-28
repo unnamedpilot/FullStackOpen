@@ -6,12 +6,7 @@ const getData = (request) => request.then(response => response.data)
 
 const getAll = () => {
     const request = axios.get(baseUrl)
-    const extraNote = {
-      content: "This shouldn't exists",
-      important: false,
-      id: "1000000"
-    }
-    return getData(request).then(data => data.concat(extraNote))
+    return getData(request)
 }
 
 const create = (newObject) => {
