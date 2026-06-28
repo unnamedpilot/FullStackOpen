@@ -34,31 +34,39 @@ app.use((request, response, next) => {
 
 app.get("/", (request, response) => response.send("<h1>Hello World</h1>"))
 
-app.get("/api/notes", (request, response) => {
+app.get("/api/notes", (request, response, next) => {
   Note
     .find({})
     .then(result => response.json(result))
+    .catch(err => {next(err)})
 })
 
-app.get("/api/notes/:id", (request, response) => {
+app.get("/api/notes/:id", (request, response, next) => {
+  
   let id = request.params.id
-  let note = Note.findById(id).then(note =>{
-    if(note) {
-      response.json(note)
-    } else {
-      response.status(404).end()
-    }
-  })
+  let note = Note.findById(id)
+    .then(note =>{
+      if(note) {
+        response.json(note)
+      } else {
+        response.status(404).end()
+      }
+    })
+    .catch(err => next(err))
   
 })
 
 app.delete("/api/notes/:id", (request, response) => {
   const id = request.params.id
-  notes = notes.filter((n) => !(n.id === id))
-  response.status(204).end()
+  Note
+    .findByIdAndDelete(id)
+    .then(result => {
+      response.json(result)
+    })
+    .catch(error => next(error))
 })
 
-app.post("/api/notes", (request, response) => {
+app.post("/api/notes", (request, response, next) => {
 
   const body = request.body
 
@@ -73,14 +81,57 @@ app.post("/api/notes", (request, response) => {
     important: Boolean(body.important)
   })
 
-  note.save().then(result => response.status(201).end())
+  note
+    .save()
+    .then(result => response.json(result))
+    .catch(err => {
+      next(err)
+    })
   
+})
+
+app.put("/api/notes/:id", (request, response, next) => {
+  const body = request.body
+
+  if(!body || !Object.hasOwn(body, "content") || !Object.hasOwn(body, "important")) {
+    console.log(body.important)
+    return response.status(400).json({error: "content and important is required"})
+  }
+
+  const { content, important } = body
+
+  Note
+    .findById(request.params.id)
+    .then(note => {
+      if (!note) {
+        return response.status(404).end()
+      }      
+
+      note.content = content
+      note.important = important
+
+      note.save().then(newNote => {
+        response.json(newNote)
+      })
+    })
+    .catch(error => next(error))
 })
 
 app.use((request, response) => {
   response.status(404).json({error: "unknown endpoint"})
 })
 
+const errorHandler = (error, response, request, next) => {
+  console.log(error.message)
+
+  if(error.name === "CastError") {
+    return response.status(400).json({ error: "malformatted id" })
+  }
+
+  next(error)
+}
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => console.log(`The server is running in ${PORT}`))
