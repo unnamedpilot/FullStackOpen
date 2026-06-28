@@ -16,7 +16,6 @@ const App = () => {
       .then(data => setNotes(data))
   }, [])
 
-  
 
   const addNote = (event) => {
     event.preventDefault()
