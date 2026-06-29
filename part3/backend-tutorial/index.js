@@ -70,12 +70,6 @@ app.post("/api/notes", (request, response, next) => {
 
   const body = request.body
 
-  if (!body.content) {
-    return response.status(400).json({
-      error: "The request doesn't have any content in the body"
-    })
-  }
-
   const note = new Note({
     content: body.content,
     important: Boolean(body.important)
@@ -121,14 +115,17 @@ app.use((request, response) => {
   response.status(404).json({error: "unknown endpoint"})
 })
 
-const errorHandler = (error, response, request, next) => {
+const errorHandler = (error, request, response, next) => {
   console.log(error.message)
 
   if(error.name === "CastError") {
     return response.status(400).json({ error: "malformatted id" })
+  } else if (error.name === "ValidationError") {
+    return response.status(400).json({error: error.message})
   }
 
   next(error)
+
 }
 
 app.use(errorHandler)
