@@ -1,7 +1,3 @@
-function generateId() {
-    return parseInt(Math.random() * 1000000000000)
-}
-
 require("dotenv").config()
 const express = require("express")
 const morgan = require("morgan")
@@ -26,55 +22,54 @@ app.use(morgan((tokens, request, response) => {
     ].join(' ')
 }))
 
-let persons = [
-    { 
-      "id": "1",
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": "2",
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": "3",
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": "4",
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
+
 
 app.get("/api/persons", (req, res) => {
-    Person.find({}).then(people => res.json(people))
+    Person
+        .find({})
+        .then(people => res.json(people))
+        .catch(err => next(err))
 })
+
 
 app.get("/info", (req, res) => {
     const now = new Date()
-    const html_file = `<p>Phonebook has info for ${persons.length}</p> 
-        <p>${now.toString()}</p>`
-    res.contentType("html").send(html_file)
+
+    Person
+        .find({})
+        .then(persons => {
+            const html_file = `<p>Phonebook has info for ${persons.length}</p> 
+                <p>${now.toString()}</p>`
+            res.contentType("html").send(html_file)
+        })
+
+    
 })
+
 
 app.get("/api/persons/:id", (req, res) => {
     const id = req.params.id
-    Person.findById(id).then(person => {
-        if(person) {
-            res.json(person)
-        } else {
-            res.status(404).end()
-        }
-    })
+    Person
+        .findById(id)
+        .then(person => {
+            if(person) {
+                res.json(person)
+            } else {
+                res.status(404).end()
+            }
+        })
+        .catch(err => next(err))
 })
+
 
 app.delete("/api/persons/:id", (req, res) => {
     const id = req.params.id
-    persons = persons.filter((person) => !(person.id === id))
-    res.status(204).end()
+    Person
+        .findByIdAndDelete(id)
+        .then(deletedPerson => {
+            res.status(204).json(deletedPerson)
+        })
+        .catch(err => next(err))
 })
 
 
@@ -89,17 +84,73 @@ app.post("/api/persons", (req, res) => {
     const number = body.number
 
 
-    Person.findOne({ name }).then(existingPerson => {
-        if (existingPerson) {
-            return res.status(409).json({error: "That name is already registered"})
-        }
+    Person
+        .findOne({ name })
+        .then(existingPerson => {
+            if (existingPerson) {
+                return res.status(409).json({error: "That name is already registered"})
+            }
 
-        const person = new Person({name, number})
-        person.save().then(savedPerson => {
-            res.status(200).json(savedPerson)
+            const person = new Person({name, number})
+            person
+                .save()
+                .then(savedPerson => {
+                    res.status(200).json(savedPerson)
+                })
+                .catch(err => next(err))
         })
-    })
+        .catch(err => next(err))
 })
+
+
+app.put("/api/persons/:id", (req, res, next) => {
+    const id = req.params.id
+    const body = req.body
+
+    if(!body || !Object.hasOwn(body, "name") || !Object.hasOwn(body, "number")) {
+        return res.status(400).json({error: "name and number are required"})
+    }
+
+    const { name, number } = body
+
+    Person
+        .findById(id)
+        .then(person => {
+            if (!person) {
+                return res.status(404).end()
+            }
+            
+            person.name = name
+            person.number = number
+
+            person
+                .save()
+                .then(updatedPerson => {
+                    res.json(updatedPerson)
+                })
+
+        })
+        .catch(err => next(err))
+})
+
+
+
+app.use((req, res) => {
+    res.status(404).json({error: "unknown endpoint"})
+})
+
+
+const errorHandler = (err, req, res, next) => {
+    console.log(err.message)
+
+    if (err.name === "CastError") {
+        res.status(400).json({error: "malformatted id"})
+    }
+
+    next(err)
+}
+
+app.use(errorHandler)
 
 
 
