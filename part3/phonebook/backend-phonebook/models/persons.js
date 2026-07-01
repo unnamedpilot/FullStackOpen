@@ -10,7 +10,10 @@ mongoose.connect(url, {family: 4}).then(result => {
 mongoose.set("strictQuery", false)
 
 const personSchema = mongoose.Schema({ 
-      name: String, 
+      name: {
+        type: String,
+        minLength: 3
+      }, 
       number: String
 })
 
