@@ -9,12 +9,35 @@ mongoose.connect(url, {family: 4}).then(result => {
 })
 mongoose.set("strictQuery", false)
 
+const validateNumberStructure = [
+    {
+        validator: (number) => /^\d+-\d+$/.test(number),
+        message: "number must have only digits and one hyphen (-)"
+    },
+    {
+        validator: (number) => number.split("-").length === 2, 
+        message: "number must have one hyphen (-)"
+    },
+    {
+        validator: (number) => {
+            const firstSegment = number.split("-")[0]
+            return firstSegment.length === 2 || firstSegment.length === 3
+            
+        },
+        message: "first part of number must have between 2 and 3 chars"
+    }
+]
+
 const personSchema = mongoose.Schema({ 
       name: {
         type: String,
-        minLength: 3
+        minLength: 3,
       }, 
-      number: String
+      number: {
+        type: String,
+        minLength: 8,
+        validate: validateNumberStructure
+      }
 })
 
 personSchema.set("toJSON", {
