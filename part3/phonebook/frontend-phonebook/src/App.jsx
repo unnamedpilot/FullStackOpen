@@ -43,6 +43,7 @@ const App = () => {
           setPersons(persons.concat(data))
           showNotification(`The person "${data.name}" was added successfully`, false)
         })
+        .catch(err => showNotification(err.response.data.error))
 
       setNewName("")
       setNewNumber("")
