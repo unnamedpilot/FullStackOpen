@@ -24,7 +24,7 @@ app.use(morgan((tokens, request, response) => {
 
 
 
-app.get("/api/persons", (req, res) => {
+app.get("/api/persons", (req, res, next) => {
     Person
         .find({})
         .then(people => res.json(people))
@@ -47,7 +47,7 @@ app.get("/info", (req, res) => {
 })
 
 
-app.get("/api/persons/:id", (req, res) => {
+app.get("/api/persons/:id", (req, res, next) => {
     const id = req.params.id
     Person
         .findById(id)
@@ -62,7 +62,7 @@ app.get("/api/persons/:id", (req, res) => {
 })
 
 
-app.delete("/api/persons/:id", (req, res) => {
+app.delete("/api/persons/:id", (req, res, next) => {
     const id = req.params.id
     Person
         .findByIdAndDelete(id)
@@ -73,7 +73,7 @@ app.delete("/api/persons/:id", (req, res) => {
 })
 
 
-app.post("/api/persons", (req, res) => {
+app.post("/api/persons", (req, res, next) => {
     const body = req.body
 
     if(!body || !body.name || !body.number) {
@@ -145,6 +145,8 @@ const errorHandler = (err, req, res, next) => {
 
     if (err.name === "CastError") {
         res.status(400).json({error: "malformatted id"})
+    } else if (err.name == "ValidationError") {
+        res.status(400).json({error: err.message})
     }
 
     next(err)
