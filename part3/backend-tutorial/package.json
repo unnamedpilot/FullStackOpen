@@ -11,11 +11,18 @@
     "start": "node index.js",
     "dev": "node --watch index.js",
     "build:ui": "rm -rf dist && cd ../frontend-tutorial && npm run build && cp -r dist ../backend-tutorial",
-    "deploy:full": "npm run build:ui && git add . && git commit -m buildui && git push origin main"
+    "deploy:full": "npm run build:ui && git add . && git commit -m buildui && git push origin main",
+    "lint": "eslint ."
   },
   "dependencies": {
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "mongoose": "^9.7.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "eslint": "^10.6.0",
+    "globals": "^17.7.0"
   }
 }
