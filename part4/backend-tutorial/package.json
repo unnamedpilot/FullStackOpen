@@ -7,7 +7,7 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"There is no test script yet\" && exit 1",
+    "test": "node --test",
     "start": "node index.js",
     "dev": "node --watch index.js",
     "build:ui": "rm -rf dist && cd ../frontend-tutorial && npm run build && cp -r dist ../backend-tutorial",
