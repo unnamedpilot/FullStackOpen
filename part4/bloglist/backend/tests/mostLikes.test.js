@@ -121,6 +121,65 @@ describe('most likes', () => {
             },
         ];
 
-        
+        const result = listHelper.mostLikes(blogsWithLikesTie)
+        const validResults = [
+            { author: 'Alice', likes: 30 },
+            { author: 'Bob', likes: 30 }
+        ]
+        const resultIsValid = validResults.some((expectedResult) =>
+            (expectedResult.author === result.author) && (expectedResult.likes === result.likes))
+
+        assert.ok(resultIsValid, 'The author object doesn\'t match any valid answer')
+    })
+
+    test('when non-consecutive authors, it should still give the correct answer', () => {
+        const blogsNonConsecutive = [
+            {
+                title: "JavaScript Arrays",
+                author: "Alice",
+                url: "https://example.com/arrays",
+                likes: 11,
+            },
+            {
+                title: "Linux Tips",
+                author: "Bob",
+                url: "https://example.com/linux",
+                likes: 9,
+            },
+            {
+                title: "Async Await",
+                author: "Alice",
+                url: "https://example.com/async",
+                likes: 22,
+            },
+            {
+                title: "Kubernetes Intro",
+                author: "Charlie",
+                url: "https://example.com/k8s",
+                likes: 17,
+            },
+            {
+                title: "TypeScript Basics",
+                author: "Alice",
+                url: "https://example.com/typescript",
+                likes: 19,
+            },
+            {
+                title: "MongoDB Indexes",
+                author: "Bob",
+                url: "https://example.com/mongodb",
+                likes: 14,
+            },
+            {
+                title: "Functional Programming",
+                author: "Alice",
+                url: "https://example.com/fp",
+                likes: 27,
+            },
+        ];
+
+        const result = listHelper.mostLikes(blogsNonConsecutive)
+        const expected = { author: 'Alice', likes: 79 }
+        assert.deepStrictEqual(result, expected)
     })
 })
