@@ -1,3 +1,5 @@
+const _ = require('lodash')
+
 const dummy = (blogs) => {
     return 1
 }
@@ -19,24 +21,9 @@ const mostBlogs = (blogs) => {
         return {}
     }
 
-    const blogsPerAuthor = blogs
-        .reduce((accBlogs, blog) => {
-            const author = blog.author
-            const newBlogsNumber = accBlogs.has(author) 
-                ? accBlogs.get(author) + 1 
-                : 1
-            return accBlogs.set(author, newBlogsNumber)
-        }, new Map())
+    const blogsPerAuthor = _.map(_.countBy(blogs, 'author'), (blogCount, author) => ({ author, blogs: blogCount }))
 
-    let mostBlogAuthor = {author: "", blogs: 0}
-    
-    for (const [author, blogs] of blogsPerAuthor) {
-        if (blogs > mostBlogAuthor.blogs) {
-            mostBlogAuthor = { author, blogs }
-        }
-    }
-
-    return mostBlogAuthor
+    return _.maxBy(blogsPerAuthor, "blogs")
 }
 
 
