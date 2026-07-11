@@ -1,5 +1,5 @@
 const notesRouter = require('express').Router()
-const { Note } = require('../models/note')
+const Note = require('../models/note')
 
 
 notesRouter.get('', (request, response, next) => {
@@ -24,7 +24,7 @@ notesRouter.get('/:id', (request, response, next) => {
 
 })
 
-notesRouter.delete(':id', (request, response, next) => {
+notesRouter.delete('/:id', (request, response, next) => {
   const id = request.params.id
   Note
     .findByIdAndDelete(id)
