@@ -1,10 +1,11 @@
 const { MongoMemoryServer } = require('mongodb-memory-server')
-const { test, describe, before, after } = require('node:test')
+const { test, describe, before, after, beforeEach } = require('node:test')
+const helper = require('./test_helper')
 const supertest = require('supertest')
+const assert = require('node:assert')
 const app = require('../app')
 const database = require('../utils/database')
 const Note = require('../models/note')
-const logger = require('../utils/logger')
 
 let memoryServer
 
@@ -12,38 +13,11 @@ before(async () => {
   memoryServer = await MongoMemoryServer.create()
   await database.connect(memoryServer.getUri())
 
-  const notes = [
-    {
-      content: 'HTML is a markup language.',
-      important: true,
-    },
-    {
-      content: 'CSS controls the presentation of a webpage.',
-      important: false,
-    },
-    {
-      content: 'JavaScript can modify the DOM.',
-      important: true,
-    },
-    {
-      content: 'Node.js allows JavaScript to run outside the browser.',
-      important: true,
-    },
-    {
-      content: 'Express is a web framework for Node.js.',
-      important: false,
-    },
-  ]
+})
 
-  try {
-    logger.info('Inserting notes to Notes collection')
-    await Note.insertMany(notes)
-    logger.info('Notes inserted')
-
-  } catch (error) {
-    logger.error('Error inserting notes:', error.message)
-    process.exit(1)
-  }
+beforeEach(async () => {
+  await Note.deleteMany({})
+  await Note.insertMany(helper.initialNotes)
 
 })
 
@@ -58,9 +32,92 @@ describe('note api', () => {
       .expect('Content-Type', /application\/json/)
   })
 
+  test('all notes are returned', async () => {
+    const response = await api.get('/api/notes')
+    assert.strictEqual(response.body.length, helper.initialNotes.length)
+  })
+
+  test('a specific note is inside the returned notes', async () => {
+    const data = await helper.notesInDb()
+    const contents = data.map(note => note.content)
+    const expected = 'JavaScript can modify the DOM.'
+    assert.ok(contents.includes(expected), `there is not ${expected} when it should be`)
+  })
+
+  test('when submiting an element, it should return it', async () => {
+    const response = await api
+      .post('/api/notes')
+      .send({ content: 'this shit is the first test', important: false })
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const body = response.body
+
+    const isValidNote = Object.hasOwn(body, 'content')
+      && Object.hasOwn(body, 'important')
+      && Object.hasOwn(body, 'id')
+
+    assert.ok(isValidNote, 'The server doesn\'t return a valid note')
+  })
+
+  test('a valid note can be added', async () => {
+    const newNote = {
+      content: 'async/await simplifies making async calls',
+      important: true,
+    }
+
+    await api
+      .post('/api/notes')
+      .send(newNote)
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+
+    const notesAtEnd = await helper.notesInDb()
+    const contentList = notesAtEnd.map(note => note.content)
+    assert.strictEqual(notesAtEnd.length, helper.initialNotes.length + 1)
+    assert.ok(contentList.includes(newNote.content))
+  })
+
+  test('note without content is not added', async () => {
+    const newNote = { important: true }
+
+    await api
+      .post('/api/notes')
+      .send(newNote)
+      .expect(400)
+
+    const notesAtEnd = await helper.notesInDb()
+    assert.strictEqual(notesAtEnd.length, helper.initialNotes.length)
+  })
+
+  test('a specific note can be viewed', async () => {
+    const notesAtStart = await helper.notesInDb()
+    const noteToView = notesAtStart[0]
+    const result = await api
+      .get(`/api/notes/${noteToView.id}`)
+      .expect(200)
+      .expect('Content-Type', /application\/json/)
+
+    assert.deepStrictEqual(result.body, noteToView)
+  })
+
+  test('when deleting a note, this one dissapear from the db', async () => {
+    const notesAtStart = await helper.notesInDb()
+    const noteToDelete = notesAtStart[0]
+
+    await api
+      .delete(`/api/notes/${noteToDelete.id}`)
+      .expect(204)
+
+    const notesAtEnd = await helper.notesInDb()
+
+    const ids = notesAtEnd.map(note => note.id)
+    assert.ok(!ids.includes(noteToDelete.id))
+
+    assert.strictEqual(notesAtEnd.length, notesAtStart.length - 1)
+  })
+
 })
-
-
 
 after(async () => {
   await database.disconnect()
