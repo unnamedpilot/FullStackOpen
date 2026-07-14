@@ -2,40 +2,32 @@ const notesRouter = require('express').Router()
 const Note = require('../models/note')
 
 
-notesRouter.get('', (request, response, next) => {
-  Note
-    .find({})
-    .then(result => response.json(result))
-    .catch(err => {next(err)})
+notesRouter.get('', async (request, response) => {
+  const result = await Note.find({})
+  response.json(result)
+
+
 })
 
-notesRouter.get('/:id', (request, response, next) => {
+notesRouter.get('/:id', async (request, response) => {
 
   let id = request.params.id
-  Note.findById(id)
-    .then(note => {
-      if(note) {
-        response.json(note)
-      } else {
-        response.status(404).end()
-      }
-    })
-    .catch(err => next(err))
+  const note = await Note.findById(id)
+  if (note) {
+    response.json(note)
+  } else {
+    response.status(404).end()
+  }
 
 })
 
-notesRouter.delete('/:id', (request, response, next) => {
+notesRouter.delete('/:id', async (request, response) => {
   const id = request.params.id
-  Note
-    .findByIdAndDelete(id)
-    .then(result => {
-      response.json(result)
-    })
-    .catch(error => next(error))
+  await Note.findByIdAndDelete(id)
+  response.status(204).end()
 })
 
-notesRouter.post('', (request, response, next) => {
-
+notesRouter.post('', async (request, response) => {
   const body = request.body
 
   const note = new Note({
@@ -43,40 +35,33 @@ notesRouter.post('', (request, response, next) => {
     important: Boolean(body.important)
   })
 
-  note
-    .save()
-    .then(result => response.json(result))
-    .catch(err => {
-      next(err)
-    })
+  const result = await note.save()
+  response.status(201).json(result)
 
 })
 
-notesRouter.put(':id', (request, response, next) => {
+notesRouter.put(':id', async (request, response) => {
   const body = request.body
 
-  if(!body || !Object.hasOwn(body, 'content') || !Object.hasOwn(body, 'important')) {
+  if (!body || !Object.hasOwn(body, 'content') || !Object.hasOwn(body, 'important')) {
     console.log(body.important)
     return response.status(400).json({ error: 'content and important is required' })
   }
 
   const { content, important } = body
 
-  Note
-    .findById(request.params.id)
-    .then(note => {
-      if (!note) {
-        return response.status(404).end()
-      }
+  const result = await Note.findById(request.params.id)
 
-      note.content = content
-      note.important = important
+  if (!result) {
+    return response.status(404).end()
+  }
 
-      note.save().then(newNote => {
-        response.json(newNote)
-      })
-    })
-    .catch(error => next(error))
+  result.content = content
+  result.important = important
+
+  result.save().then(newNote => {
+    response.json(newNote)
+  })
 })
 
 module.exports = notesRouter
