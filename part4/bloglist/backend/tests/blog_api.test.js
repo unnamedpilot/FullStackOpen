@@ -47,7 +47,6 @@ let memoryServer
 before(async () => {
     memoryServer = await MongoMemoryServer.create()
     await database.connect(memoryServer.getUri())
-    console.log("it already stopped")
 })
 
 beforeEach(async () => {
@@ -147,12 +146,95 @@ describe('blogs api', () => {
         assert.strictEqual(blogsAtStart.length, blogsAtEnd.length)
 
     })
+
+    describe('deleting a note', () => {
+        test('when deleting a note, it dissapear from the db', async () => {
+            const blogsAtStart = await helper.blogsInDb()
+            const blogToDelete = blogsAtStart[0]
+
+            await api
+                .delete(`/api/blogs/${blogToDelete.id}`)
+                .expect(204)
+
+            const blogsAtEnd = await helper.blogsInDb()
+            assert.strictEqual(blogsAtEnd.length, blogsAtStart.length - 1)
+            const ids = blogsAtEnd.map(blog => blog.id)
+            assert.ok(!ids.includes(blogToDelete.id))
+
+        })
+
+        test('when deleting a note with a non-existent id, return 204', async () => {
+            const nonExistentId = await helper.nonExistentId()
+            const blogsAtStart = await helper.blogsInDb()
+            await api
+                .delete(`/api/blogs/${nonExistentId}`)
+                .expect(204)
+
+            const blogsAtEnd = await helper.blogsInDb()
+            assert.strictEqual(blogsAtStart.length, blogsAtEnd.length)
+        })
+
+        test('when deleting a note with an invalid ID, return status 400', async () => {
+            await api
+                .delete(`/api/blogs/1`)
+                .expect(400)
+        })
+    })
+
+    describe('updating a blog record', () => {
+        test('updating an element make it change in the db', async () => {
+            const blogsAtStart = await helper.blogsInDb()
+            const blogToUpdate = blogsAtStart[0]
+            blogToUpdate.likes += 1
+
+            console.log('This is the id', blogToUpdate.id)
+
+            await api
+                .put(`/api/blogs/${blogToUpdate.id}`)
+                .send(blogToUpdate)
+                .expect(200)
+
+            const blogsAtEnd = await helper.blogsInDb()
+            const updatedBlog = blogsAtEnd.find(blog => blog.id === blogToUpdate.id)
+            assert.deepStrictEqual(blogToUpdate, updatedBlog)
+        })
+
+        test('updating an element with a invalid Id returns 404', async () => {
+            const testBlog = {
+                title: "Building Scalable Express Applications",
+                author: "Addy Osmani",
+                url: "https://example.com/scalable-express",
+                likes: 27,
+            }
+            const nonExistingId = await helper.nonExistentId()
+            await api
+                .put(`/api/blogs/${nonExistingId}`)
+                .send(testBlog)
+                .expect(404)
+        })
+
+        test('updating an element without likes returns 400', async () => {
+            const blogsAtStart = await helper.blogsInDb()
+            const blogBefore = blogsAtStart[0]
+            await api
+                .put(`/api/blogs/${blogBefore.id}`)
+                .send({})
+                .expect(400)
+            
+            const blogsAtEnd = await helper.blogsInDb()
+            const blogAfter = blogsAtEnd.find(blog => blog.id === blogBefore.id)
+            assert.deepStrictEqual(blogBefore, blogAfter)
+        })
+    })
+
+
+
+
 })
 
 
 after(async () => {
     await database.disconnect()
     await memoryServer.stop()
-    console.log('stopped Correctly')
 })
 
