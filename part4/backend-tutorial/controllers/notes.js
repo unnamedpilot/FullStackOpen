@@ -1,9 +1,12 @@
 const notesRouter = require('express').Router()
 const Note = require('../models/note')
+const User = require('../models/user')
 
 
 notesRouter.get('', async (request, response) => {
-  const result = await Note.find({})
+  const result = await Note
+    .find({})
+    .populate('user', { username: 1, name: 1 })
   response.json(result)
 
 
@@ -30,12 +33,20 @@ notesRouter.delete('/:id', async (request, response) => {
 notesRouter.post('', async (request, response) => {
   const body = request.body
 
+  const user = await User.findById(body.userId)
+  if (!user) {
+    return response.status(400).json({ error: 'userId is missing or is invalid' })
+  }
+
   const note = new Note({
     content: body.content,
-    important: Boolean(body.important)
+    important: Boolean(body.important),
+    user: user._id
   })
 
   const result = await note.save()
+  user.notes = user.notes.concat(note._id)
+  await user.save()
   response.status(201).json(result)
 
 })

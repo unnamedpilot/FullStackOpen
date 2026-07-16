@@ -6,8 +6,11 @@ const assert = require('node:assert')
 const app = require('../app')
 const database = require('../utils/database')
 const Note = require('../models/note')
+const User = require('../models/user')
+const bcrypt = require('bcrypt')
 
 let memoryServer
+let userId
 
 before(async () => {
   memoryServer = await MongoMemoryServer.create()
@@ -18,7 +21,14 @@ before(async () => {
 beforeEach(async () => {
   await Note.deleteMany({})
   await Note.insertMany(helper.initialNotes)
-
+  await User.deleteMany({})
+  const passwordHash = await bcrypt.hash('wawaleke', 10)
+  const user = await User.create({
+    username: 'root',
+    name: 'superadmin',
+    passwordHash
+  })
+  userId = user._id
 })
 
 const api = supertest(app)
@@ -47,10 +57,15 @@ describe('note api', () => {
   })
 
   describe('addition of a new note', () => {
+    /**
+     * If the userId of the note doesn't exist, it should return error 400
+     * Note without userId is not allowed
+     */
     test('a valid note can be added', async () => {
       const newNote = {
         content: 'async/await simplifies making async calls',
         important: true,
+        userId
       }
 
       await api
@@ -105,6 +120,7 @@ describe('note api', () => {
   })
 
   describe('deletion of a note', () => {
+    // It should also check that it's erased in the user list
     test('when deleting a note, this one dissapear from the db', async () => {
       const notesAtStart = await helper.notesInDb()
       const noteToDelete = notesAtStart[0]
