@@ -1,14 +1,14 @@
 const { test, describe } = require('node:test')
 const assert = require('node:assert')
-const listHelper = require('../utils/list_helper')
+const listHelper = require('../../utils/list_helper')
 
-describe('most blogs', () => {
-    test('when there is no blogs, it should return an empty object', () => {
-        const result = listHelper.mostBlogs([])
+describe('most likes', () => {
+    test('when there are not blogs, it should return an empty object', () => {
+        const result = listHelper.mostLikes([])
         assert.deepStrictEqual(result, {})
     })
 
-    test('when there is only one author, it should choose that author', () => {
+    test('when there is one blog, it should show the author and the likes of the blog', () => {
         const blogs = [{
             _id: "5a422a851b54a676234d17f7",
             title: "React patterns",
@@ -17,16 +17,12 @@ describe('most blogs', () => {
             likes: 7,
             __v: 0
         }]
-        const expected = {
-            author: "Michael Chan",
-            blogs: 1
-        }
-
-        const result = listHelper.mostBlogs(blogs)
+        const result = listHelper.mostLikes(blogs)
+        const expected = { author: "Michael Chan", likes: 7 }
         assert.deepStrictEqual(result, expected)
     })
 
-    test('when there is one author with clear most blogs, it should choose him', () => {
+    test('when there is one clear author with most likes, it should choose him', () => {
         const blogs = [
             {
                 _id: "5a422a851b54a676234d17f7",
@@ -77,81 +73,66 @@ describe('most blogs', () => {
                 __v: 0
             }
         ]
-        const result = listHelper.mostBlogs(blogs)
+        const result = listHelper.mostLikes(blogs)
         const expected = {
-            author: "Robert C. Martin",
-            blogs: 3
+            author: "Edsger W. Dijkstra",
+            likes: 17
         }
-
         assert.deepStrictEqual(result, expected)
-
     })
 
-    test('when there are several authors, many with the same amount of posts, it should choose any of the possible candidates', () => {
-        const blogsWithTie = [
+    test('when there is a tie between authors, it should return any of them', () => {
+        const blogsWithLikesTie = [
             {
                 title: "Understanding Closures",
                 author: "Alice",
                 url: "https://example.com/closures",
-                likes: 12,
+                likes: 20,
             },
             {
                 title: "Promises Explained",
                 author: "Alice",
                 url: "https://example.com/promises",
-                likes: 15,
-            },
-            {
-                title: "Testing with Jest",
-                author: "Alice",
-                url: "https://example.com/jest",
-                likes: 18,
+                likes: 10,
             },
             {
                 title: "Node.js Streams",
                 author: "Bob",
                 url: "https://example.com/streams",
-                likes: 20,
+                likes: 15,
             },
             {
                 title: "REST API Design",
                 author: "Bob",
                 url: "https://example.com/rest",
-                likes: 30,
-            },
-            {
-                title: "Docker Basics",
-                author: "Bob",
-                url: "https://example.com/docker",
-                likes: 25,
+                likes: 15,
             },
             {
                 title: "CSS Grid Guide",
                 author: "Charlie",
                 url: "https://example.com/grid",
-                likes: 8,
+                likes: 18,
+            },
+            {
+                title: "Docker Basics",
+                author: "Charlie",
+                url: "https://example.com/docker",
+                likes: 5,
             },
         ];
-        const result = listHelper.mostBlogs(blogsWithTie)
-        const expected_results = [
-            {
-                author: 'Alice',
-                blogs: 3
-            },
-            {
-                author: 'Bob',
-                blogs: 3
-            }
 
+        const result = listHelper.mostLikes(blogsWithLikesTie)
+        const validResults = [
+            { author: 'Alice', likes: 30 },
+            { author: 'Bob', likes: 30 }
         ]
+        const resultIsValid = validResults.some((expectedResult) =>
+            (expectedResult.author === result.author) && (expectedResult.likes === result.likes))
 
-        const isValidResult = expected_results.some(
-            expected => expected.author === result.author && expected.blogs === result.blogs)
-
-        assert.ok(isValidResult, "The object is not any of the expected")
+        assert.ok(resultIsValid, 'The author object doesn\'t match any valid answer')
     })
-    
-    test('when the author with most blogs has non-consecutive blogs, it should still choose him', () => {
+
+    test('when non-consecutive authors, it should still give the correct answer', () => {
         const blogsNonConsecutive = [
             {
                 title: "JavaScript Arrays",
@@ -196,12 +177,9 @@ describe('most blogs', () => {
                 likes: 27,
             },
         ];
-        const result = listHelper.mostBlogs(blogsNonConsecutive)
-        const expected = {
-            author: "Alice",
-            blogs: 4
-        }
 
+        const result = listHelper.mostLikes(blogsNonConsecutive)
+        const expected = { author: 'Alice', likes: 79 }
         assert.deepStrictEqual(result, expected)
     })
 })
