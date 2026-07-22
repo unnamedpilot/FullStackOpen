@@ -11,6 +11,7 @@ const LoginForm = ({ setUser, showNotification }) => {
 
     try {
       const user = await loginService.login({ username, password });
+      window.localStorage.set('loggedNoteappUser', JSON.stringify(user))
       setUser(user);
       noteService.setToken(user.token)
       setUsername("");
