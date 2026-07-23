@@ -2,10 +2,10 @@ import styles from './Notification.module.css'
 
 const Notification = ({ message, options }) => {
   if (!message) {
-    return null;
+    return null
   }
 
-  const type = options.type === 'error' 
+  const type = options.type === 'error'
     ? styles.error
     : styles.success
 
@@ -15,7 +15,7 @@ const Notification = ({ message, options }) => {
     <>
       <div className={notificationStyles}>{message}</div>
     </>
-  );
-};
+  )
+}
 
 export default Notification

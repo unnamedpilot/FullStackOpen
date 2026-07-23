@@ -1,22 +1,22 @@
-import { useState } from "react";
-import loginService from "../services/login";
+import { useState } from 'react'
+import loginService from '../services/login'
 
-const LoginForm = ({updateLoggedUser, showNotification}) => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+const LoginForm = ({ updateLoggedUser, showNotification }) => {
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
 
-	const handleLogin = async (event) => {
-		event.preventDefault()
-		try {
-      const user = await loginService.login({username, password})
+  const handleLogin = async (event) => {
+    event.preventDefault()
+    try {
+      const user = await loginService.login({ username, password })
       updateLoggedUser(user)
       setUsername('')
       setPassword('')
     } catch {
-      showNotification('wrong credentials', {type: 'error'})
+      showNotification('wrong credentials', { type: 'error' })
     }
 
-	} 
+  }
   return (
     <>
       <h2>Login</h2>
@@ -36,7 +36,7 @@ const LoginForm = ({updateLoggedUser, showNotification}) => {
         <button type="submit">login</button>
       </form>
     </>
-  );
-};
+  )
+}
 
-export default LoginForm;
+export default LoginForm

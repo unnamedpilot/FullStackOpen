@@ -1,30 +1,30 @@
-import { useState } from "react";
-import blogService from "../services/blogs";
+import { useState } from 'react'
+import blogService from '../services/blogs'
 
-export default function BlogForm({showNotification, addBlog}) {
-  const [title, setTitle] = useState("");
-  const [author, setAuthor] = useState("");
-  const [url, setUrl] = useState("");
+export default function BlogForm({ showNotification, addBlog }) {
+  const [title, setTitle] = useState('')
+  const [author, setAuthor] = useState('')
+  const [url, setUrl] = useState('')
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
+    event.preventDefault()
     const newBlog = {
       title,
       author,
       url,
     }
     try {
-        const content = await blogService.create(newBlog)
-        addBlog(content)
-        setTitle('')
-        setAuthor('')
-        setUrl('')
-        showNotification(`A new blog ${content.title} added`, {type: 'success'})
+      const content = await blogService.create(newBlog)
+      addBlog(content)
+      setTitle('')
+      setAuthor('')
+      setUrl('')
+      showNotification(`A new blog ${content.title} added`, { type: 'success' })
     } catch {
-        showNotification('Something went wrong', {type: 'error'})
-        
+      showNotification('Something went wrong', { type: 'error' })
+
     }
-  };
+  }
 
   return (
     <>
@@ -63,5 +63,5 @@ export default function BlogForm({showNotification, addBlog}) {
         <button type="submit">submit</button>
       </form>
     </>
-  );
+  )
 }
