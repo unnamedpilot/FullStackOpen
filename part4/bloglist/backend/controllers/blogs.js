@@ -13,13 +13,13 @@ blogsRouter.get('/api/blogs', async (request, response) => {
 blogsRouter.post('/api/blogs', async (request, response) => {
 
   const user = request.user
-  
+
   if (!user) {
     return response.status(401).json({ error: 'invalid token' })
   }
-  
+
   const blog = new Blog({ ...request.body, user: user._id })
-  
+
   await blog.save()
   user.blogs = user.blogs.concat(blog._id)
   await user.save()
@@ -34,12 +34,12 @@ blogsRouter.delete('/api/blogs/:id', async (request, response) => {
   }
 
   const blog = await Blog.findById(id)
-  if(!blog) {
+  if (!blog) {
     return response.status(404).end()
   }
 
-  if(user._id.toString() !== blog.user.toString()) {
-    return response.status(401).json({error: 'unauthorized delete operation'})
+  if (user._id.toString() !== blog.user.toString()) {
+    return response.status(401).json({ error: 'unauthorized delete operation' })
   }
 
   await blog.deleteOne()
@@ -51,19 +51,28 @@ blogsRouter.delete('/api/blogs/:id', async (request, response) => {
 
 blogsRouter.put('/api/blogs/:id', async (request, response) => {
   const newBlog = request.body
+  const id = request.params.id
 
   if (!newBlog || !Object.hasOwn(newBlog, 'likes')) {
     response.status(400).json({ error: '"likes" property it\'s required' })
   }
 
-  const currBlog = await Blog.findById(request.params.id)
+  newBlog.user = newBlog.user.id
 
-  if (!currBlog) {
+  const updatedBlog = await Blog.findByIdAndUpdate(
+    id,
+    newBlog,
+    { returnDocument: 'after', runValidators: true }
+  )
+
+  if (!updatedBlog) {
     response.status(404).json({ 'error': `there is no document with id ${request.params.id}` })
   }
-  currBlog.likes = newBlog.likes
-  await currBlog.save()
-  response.status(200).end()
+
+  const blog = await updatedBlog.populate('user', 'username name')
+
+
+  response.status(200).json(blog)
 })
 
 module.exports = blogsRouter
