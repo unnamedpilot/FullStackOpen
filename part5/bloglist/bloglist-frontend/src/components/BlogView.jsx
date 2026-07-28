@@ -10,9 +10,15 @@ export default function BlogView({ showNotification, user }) {
     blogService.getAll().then((blogs) => setBlogs(blogs))
   }, [])
 
-  const addBlog = (newBlog) => {
-    blogFormRef.current.toggleVisibility()
-    setBlogs(blogs.concat(newBlog))
+  const addBlog = async (newBlog) => {
+    try {
+      const content = await blogService.create(newBlog)
+      setBlogs(blogs.concat(content))
+      blogFormRef.current.toggleVisibility()
+      showNotification(`A new blog ${newBlog.title} added`, { type: 'success' })
+    } catch (error) {
+      showNotification(error, { type: 'error' })
+    }
   }
 
   const increaseLikes = async (blog) => {
@@ -29,11 +35,15 @@ export default function BlogView({ showNotification, user }) {
   }
 
   const removeBlog = async (deletingBlog) => {
-    const userConfirmed = confirm(`Are you sure that you want to delete ${deletingBlog.title}`)
-    if(!userConfirmed) { return }
+    const userConfirmed = confirm(
+      `Are you sure that you want to delete ${deletingBlog.title}`,
+    )
+    if (!userConfirmed) {
+      return
+    }
     try {
       await blogService.remove(deletingBlog.id)
-      setBlogs(blogs.filter(blog => blog.id !== deletingBlog.id))
+      setBlogs(blogs.filter((blog) => blog.id !== deletingBlog.id))
     } catch (error) {
       showNotification(error.response.data.error, { type: 'error' })
     }
@@ -45,7 +55,12 @@ export default function BlogView({ showNotification, user }) {
         <BlogForm showNotification={showNotification} addBlog={addBlog} />
       </Toggable>
 
-      <BlogTable blogs={blogs} increaseLikes={increaseLikes} removeBlog={removeBlog} user={user}/>
+      <BlogTable
+        blogs={blogs}
+        increaseLikes={increaseLikes}
+        removeBlog={removeBlog}
+        user={user}
+      />
     </>
   )
 }

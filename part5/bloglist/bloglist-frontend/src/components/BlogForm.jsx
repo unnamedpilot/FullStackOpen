@@ -1,7 +1,6 @@
 import { useState } from 'react'
-import blogService from '../services/blogs'
 
-export default function BlogForm({ showNotification, addBlog }) {
+export default function BlogForm({ addBlog }) {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
@@ -13,17 +12,10 @@ export default function BlogForm({ showNotification, addBlog }) {
       author,
       url,
     }
-    try {
-      const content = await blogService.create(newBlog)
-      addBlog(content)
-      setTitle('')
-      setAuthor('')
-      setUrl('')
-      showNotification(`A new blog ${content.title} added`, { type: 'success' })
-    } catch {
-      showNotification('Something went wrong', { type: 'error' })
-
-    }
+    addBlog(newBlog)
+    setTitle('')
+    setAuthor('')
+    setUrl('')
   }
 
   return (
