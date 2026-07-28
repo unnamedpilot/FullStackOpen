@@ -1,35 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import noteService from '../services/notes'
 import Notes from './Notes'
+import NoteForm from './NoteForm'
 import Togglable from './Togglable'
 
 const NoteSection = ({ showNotification }) => {
   const [notes, setNotes] = useState([])
-  const [newNote, setNewNote] = useState('...A new note')
   const [showAll, setShowAll] = useState(true)
   const noteFormRef = useRef()
 
   useEffect(() => {
     noteService.getAll().then((data) => setNotes(data))
   }, [])
-
-  const handleAddNote = (event) => {
-    event.preventDefault()
-    noteFormRef.current.toggleVisibility()
-    const newRecord = {
-      content: newNote,
-      important: true,
-    }
-
-    noteService.create(newRecord).then((data) => {
-      setNotes(notes.concat(data))
-      setNewNote('')
-    })
-  }
-
-  const handleNoteChange = (event) => {
-    setNewNote(event.target.value)
-  }
 
   const toggleImportanceOf = (id) => {
     const element_address = notes.findIndex((note) => note.id === id)
@@ -52,19 +34,22 @@ const NoteSection = ({ showNotification }) => {
       })
   }
 
+  const handleAddNote = async (newNote) => {
+    const data = await noteService.create(newNote)
+    setNotes(notes.concat(data))
+    noteFormRef.current.toggleVisibility()
+  }
+
   const notesToShow = showAll ? notes : notes.filter((note) => note.important)
 
   return (
     <>
-      <Togglable buttonLabel='show notes' ref={noteFormRef}>
-        <button onClick={() => setShowAll(!showAll)}>
-          show {showAll ? 'important' : 'all'}
-        </button>
-        <Notes notes={notesToShow} toggleImportance={toggleImportanceOf} />
-        <form onSubmit={handleAddNote}>
-          <input value={newNote} onChange={handleNoteChange} />
-          <button type="submit">submit</button>
-        </form>
+      <button onClick={() => setShowAll(!showAll)}>
+        show {showAll ? 'important' : 'all'}
+      </button>
+      <Notes notes={notesToShow} toggleImportance={toggleImportanceOf} />
+      <Togglable buttonLabel="show notes" ref={noteFormRef}>
+        <NoteForm onAddNote={handleAddNote} />
       </Togglable>
     </>
   )
