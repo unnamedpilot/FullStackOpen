@@ -15,12 +15,16 @@ const NoteForm = ({ onAddNote }) => {
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <input
-          value={newNote}
-          onChange={(event) => {
-            setNewNote(event.target.value)
-          }}
-        />
+        <label>
+          content
+          <input
+            value={newNote}
+            onChange={(event) => {
+              setNewNote(event.target.value)
+            }}
+          />
+        </label>
+
         <button type="submit">submit</button>
       </form>
     </>

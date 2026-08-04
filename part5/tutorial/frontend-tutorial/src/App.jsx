@@ -23,13 +23,13 @@ const App = () => {
 
   const showNotification = (message) => {
     setErrorMessage(message)
-    setTimeout(() => setErrorMessage(null))
+    setTimeout(() => setErrorMessage(null), 5000)
   }
 
   const loginForm = () => {
     return (
       <>
-        <Togglable buttonLabel='show login'>
+        <Togglable buttonLabel="show login">
           <LoginForm setUser={setUser} showNotification={showNotification} />
         </Togglable>
       </>
