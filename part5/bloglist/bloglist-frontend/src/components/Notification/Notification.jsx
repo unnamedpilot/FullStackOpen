@@ -1,13 +1,11 @@
 import styles from './Notification.module.css'
 
-const Notification = ({ message, options }) => {
+const Notification = ({ message, options = { type: 'error' } }) => {
   if (!message) {
     return null
   }
 
-  const type = options.type === 'error'
-    ? styles.error
-    : styles.success
+  const type = options.type === 'error' ? styles.error : styles.success
 
   const notificationStyles = `${styles.notification} ${type}`
 

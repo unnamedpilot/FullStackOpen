@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const Blog = ({ blog, increaseLikes, removeBlog, canRemove }) => {
+const Blog = ({ blog, increaseLikes, removeBlog, user }) => {
   const [isDetailsVisible, setIsDetailVisible] = useState(false)
   const blogStyle = {
     paddingTop: 10,
@@ -10,6 +10,13 @@ const Blog = ({ blog, increaseLikes, removeBlog, canRemove }) => {
     marginBottom: 5,
   }
 
+  if (!blog) {
+    return <span>Wait a moment, it's loading...</span>
+  }
+
+  const canRemove = user ? user.username === blog.user.username : false
+  const canLike = user ? true : false
+
   const toggleVisibility = () => {
     setIsDetailVisible(!isDetailsVisible)
   }
@@ -17,7 +24,7 @@ const Blog = ({ blog, increaseLikes, removeBlog, canRemove }) => {
   const showWhenVisible = { display: isDetailsVisible ? '' : 'none' }
 
   return (
-    <div style={blogStyle} data-testid='blog'>
+    <div style={blogStyle} data-testid="blog">
       <div>
         <div>{blog.title}</div>
         <div>{blog.author}</div>
@@ -28,14 +35,16 @@ const Blog = ({ blog, increaseLikes, removeBlog, canRemove }) => {
       <div style={showWhenVisible}>
         <div>{blog.url}</div>
         <div>
-            likes {blog.likes}
-          <button type="button" onClick={() => increaseLikes(blog)}>
+          likes {blog.likes}
+          {canLike && (
+            <button type="button" onClick={() => increaseLikes(blog)}>
               like
-          </button>
+            </button>
+          )}
         </div>
         {canRemove && (
           <button type="button" onClick={() => removeBlog(blog)}>
-              remove
+            remove
           </button>
         )}
       </div>

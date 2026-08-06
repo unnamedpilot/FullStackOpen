@@ -1,20 +1,16 @@
-import Blog from './Blog'
+import { Link } from 'react-router-dom'
 
-export default function BlogTable({ blogs, increaseLikes, removeBlog, user }) {
+export default function BlogTable({ blogs }) {
   const orderedBlogs = blogs.toSorted((a, b) => b.likes - a.likes)
   return (
-    <>
+    <ul>
       {orderedBlogs.map((blog) => {
         return (
-          <Blog
-            key={blog.id}
-            blog={blog}
-            increaseLikes={increaseLikes}
-            removeBlog={removeBlog}
-            canRemove={user.username === blog.user.username}
-          />
+          <li key={blog.id}>
+            <Link to={`/blogs/${blog.id}`}>{blog.title}</Link>
+          </li>
         )
       })}
-    </>
+    </ul>
   )
 }

@@ -16,6 +16,9 @@ describe('Blog application', () => {
     })
 
     describe('Login', () => {
+        beforeEach(async ({ page }) => {
+            await page.getByText('log in').click()
+        })
         test('login form is shown', async ({ page }) => {
             const usernameField = page.getByLabel('username')
             const passwordField = page.getByLabel('password')
@@ -47,7 +50,7 @@ describe('Blog application', () => {
             const url = 'alverth.site/ddia'
             await helper.createBlog(page, title, author, url)
 
-
+            await expect(page.getByRole('heading', { name: 'blogs' })).toBeVisible()
             await expect(page.getByText(`new blog ${title} added`)).toBeVisible()
             await expect(page.getByText(title, { exact: true })).toBeVisible()
         })
@@ -58,59 +61,70 @@ describe('Blog application', () => {
                 const author = 'Alverth'
                 const url = 'alverth.site/ddia'
                 await helper.createBlog(page, title, author, url)
-                page.getByText('Designing Data Intensive Systems', { exact: true }).waitFor()
+                await page.getByRole('link', { name: 'blogs' }).click()
             })
             test('a blog can be liked', async ({ page }) => {
-                const blog = page.getByTestId('blog')
-                await blog.getByRole('button', { name: 'show', exact: true }).click()
+                const blogs = page.getByRole('list')
+                await blogs.getByRole('link').click()
+                const detailedBlog = page.getByTestId('blog')
+                await detailedBlog.getByRole('button', { name: 'show', exact: true }).click()
 
-                await blog.getByRole('button', { name: 'like' }).click()
-                expect(blog.getByText('likes 1')).toBeVisible()
+                await detailedBlog.getByRole('button', { name: 'like' }).click()
+                expect(detailedBlog.getByText('likes 1')).toBeVisible()
             })
 
             test('a blog can be removed by its owner', async ({ page }) => {
-                await page.getByRole('button', { name: 'show', exact: true }).click()
+                const blogs = page.getByRole('list')
+                await blogs.getByRole('link').click()
+                const detailedBlog = page.getByTestId('blog')
+                await detailedBlog.getByRole('button', { name: 'show', exact: true }).click()
                 page.on('dialog', dialog => dialog.accept())
-                await page.getByRole('button', { name: 'remove' }).click()
-                await expect(page.getByText('Designing Data Intensive Systems', { exact: true }))
-                    .not.toBeAttached()
-            })
-
-            test('only the owner can see the remove button', async ({ page, request }) => {
-                const user = {
-                    name: 'Tester',
-                    username: 'thetester',
-                    password: 'secret2'
-                }
-                await request.post('/api/users', { data: user })
-                await page.getByRole('button', { name: 'logout' }).click()
-                await helper.loginWith(page, 'thetester', 'secret2')
-                await page.getByRole('button', { name: 'show', exact: true }).click()
-                await expect(page.getByRole('button', {name: 'remove'})).not.toBeAttached()
-            })
-            test('ensure blog post are being showing in ascending order considering likes', async({ page, request }) => {
-                await request.post('/api/test/blog')
-                await page.reload()
-                const blogs = await page.getByTestId('blog').all()
-                let previous_value= Infinity
-
-                for (const blog of blogs) {
-                    await blog.getByRole('button', {name: 'show'}).click()
-                    const text = await blog.innerText()
-                    const strLikesNumber = text.match(/likes \d+like/)[0].match(/\d+/)[0]
-                    const likesNumber = parseInt(strLikesNumber)
-                    expect(likesNumber).toBeLessThanOrEqual(previous_value)
-                    previous_value = likesNumber
-                }
-
-            })
-        
+                await detailedBlog.getByRole('button', { name: 'remove' }).click()
+                await expect(detailedBlog).not.toBeAttached()
         })
 
+        test('only the owner can see the remove button', async ({ page, request }) => {
+            const user = {
+                name: 'Tester',
+                username: 'thetester',
+                password: 'secret2'
+            }
+            await request.post('/api/users', { data: user })
 
+            await page.getByRole('button', { name: 'logout' }).click()
+            await helper.loginWith(page, 'thetester', 'secret2')
+            await expect(page.getByText('Tester is logged in')).toBeVisible()
+            
+            await page.getByRole('link', { name: 'blogs' }).click()
+            const blogs = page.getByRole('list')
+            await blogs.getByRole('link').click()
+            const detailedBlog = page.getByTestId('blog')
+            await detailedBlog.getByRole('button', { name: 'show'}).click()
+            await expect(detailedBlog.getByRole('button', { name: 'remove' })).not.toBeAttached()
+        })
+        test('ensure blog post are being showing in ascending order considering likes', async ({ page, request }) => {
+            await request.post('/api/test/blog')
+            await page.reload()
+            const blogs = await page.getByTestId('blog').all()
+            let previous_value = Infinity
 
+            for (const blog of blogs) {
+                await blog.getByRole('button', { name: 'show' }).click()
+                const text = await blog.innerText()
+                const strLikesNumber = text.match(/likes \d+like/)[0].match(/\d+/)[0]
+                const likesNumber = parseInt(strLikesNumber)
+                expect(likesNumber).toBeLessThanOrEqual(previous_value)
+                previous_value = likesNumber
+            }
+
+        })
 
     })
+
+
+
+
+})
 
 
 
