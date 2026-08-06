@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate as navigate } from 'react-router-dom'
 
 const NoteForm = ({ onAddNote }) => {
   const [newNote, setNewNote] = useState('')
@@ -10,6 +11,7 @@ const NoteForm = ({ onAddNote }) => {
     }
     onAddNote(note)
     setNewNote('')
+    navigate('/notes')
   }
 
   return (
