@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { TextField, Button, Paper } from '@mui/material'
 import loginService from '../services/login'
 
 const LoginForm = ({ updateLoggedUser, showNotification }) => {
@@ -13,27 +14,35 @@ const LoginForm = ({ updateLoggedUser, showNotification }) => {
       setUsername('')
       setPassword('')
     } catch {
-      showNotification('wrong credentials', { type: 'error' })
+      const notificationObject = { text: 'wrong credentials', type:'error'  }
+      showNotification(notificationObject)
     }
-
   }
   return (
     <>
-      <h2>Login</h2>
+      <h2>Log in to application</h2>
       <form onSubmit={handleLogin}>
         <div>
-          <label>
-            username
-            <input type="text" value={username} onChange={e => setUsername(e.target.value)}/>
-          </label>
+          <TextField
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            label="username"
+            variant="standard"
+          ></TextField>
         </div>
         <div>
-          <label>
-            password
-            <input type="text" value={password} onChange={e => setPassword(e.target.value)} />
-          </label>
+          <TextField
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            label="password"
+            variant="standard"
+          ></TextField>
         </div>
-        <button type="submit">login</button>
+        <div style={{ paddingTop: 10 }}>
+          <Button type="submit" variant="contained">
+            LOGIN
+          </Button>
+        </div>
       </form>
     </>
   )

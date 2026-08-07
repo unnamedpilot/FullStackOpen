@@ -7,6 +7,14 @@ import {
   useMatch,
   useNavigate,
 } from 'react-router-dom'
+import {
+  Container,
+  AppBar,
+  Toolbar,
+  Button,
+  Typography,
+  Box,
+} from '@mui/material'
 import LoginForm from './components/LoginForm'
 import Notification from './components/Notification/Notification'
 import Blog from './components/Blog'
@@ -21,8 +29,7 @@ const App = () => {
   })
   const [blogs, setBlogs] = useState([])
   const navigate = useNavigate()
-  const [notificationMessage, setNotificationMessage] = useState(null)
-  const [notificationOptions, setNotificationOptions] = useState(null)
+  const [notification, setNotification] = useState(null)
 
   useEffect(() => {
     if (user) {
@@ -34,10 +41,9 @@ const App = () => {
     blogService.getAll().then((blogs) => setBlogs(blogs))
   }, [])
 
-  const showNotification = (message, options) => {
-    setNotificationMessage(message)
-    setNotificationOptions(options)
-    setTimeout(() => setNotificationMessage(null), 5000)
+  const showNotification = (notification) => {
+    setNotification(notification)
+    setTimeout(() => setNotification(null), 5000)
   }
 
   const updateLoggedUser = (userData) => {
@@ -56,12 +62,18 @@ const App = () => {
     try {
       const content = await blogService.create(newBlog)
       setBlogs(blogs.concat(content))
-      showNotification(`A new blog ${newBlog.title} added`, {
+      const notificationObject = {
+        text: `A new blog ${newBlog.title} added`,
         type: 'success',
-      })
+      }
+      showNotification(notificationObject)
       navigate('/blogs')
     } catch (error) {
-      showNotification(error, { type: 'error' })
+      const notificationObject = {
+        text: error.response.data.error,
+        type: 'error',
+      }
+      showNotification(notificationObject)
     }
   }
 
@@ -90,7 +102,8 @@ const App = () => {
       setBlogs(blogs.filter((blog) => blog.id !== deletingBlog.id))
       navigate('/blogs')
     } catch (error) {
-      showNotification(error.response.data.error, { type: 'error' })
+      const notificationObject = { text: error.response.data.error, type: 'error' }
+      showNotification(notificationObject)
     }
   }
 
@@ -125,30 +138,39 @@ const App = () => {
     )
   }
 
-  const padding = { padding: 5 }
   const match = useMatch('/blogs/:id')
   const blog = match ? blogs.find((note) => note.id === match.params.id) : null
 
   return (
-    <div>
-      <div>
-        <Link style={padding} to="/blogs">
-          blogs
-        </Link>
-        <Link style={padding} to="/create">
-          new blog
-        </Link>
-        {user && (
-          <button type="button" onClick={cleanLoggedUser}>
-            logout
-          </button>
-        )}
-        {!user && (
-          <Link style={padding} to="/login">
-            log in
-          </Link>
-        )}
-      </div>
+    <Container>
+      <AppBar position="static">
+        <Toolbar sx={{ justifyContent: 'space-between' }}>
+          <Typography variant="h6">Blog App</Typography>
+          <Box>
+            <Button color="inherit" component={Link} to="/blogs">
+              Blogs
+            </Button>
+            <Button color="inherit" component={Link} to="/create">
+              New Blog
+            </Button>
+            {user && (
+              <Button color="inherit" onClick={cleanLoggedUser}>
+                Log out
+              </Button>
+            )}
+            {!user && (
+              <Button
+                color="inherit"
+                component={Link}
+                to="/login"
+                sx={{ alignSelf: 'end' }}
+              >
+                Log In
+              </Button>
+            )}
+          </Box>
+        </Toolbar>
+      </AppBar>
       <Routes>
         <Route path="/blogs" element={blogList()} />
         <Route path="/login" element={loginForm()} />
@@ -165,11 +187,8 @@ const App = () => {
         />
         <Route path="/create" element={<BlogForm addBlog={addBlog} />} />
       </Routes>
-      <Notification
-        message={notificationMessage}
-        options={notificationOptions}
-      />
-    </div>
+      <Notification notification={notification} />
+    </Container>
   )
 }
 

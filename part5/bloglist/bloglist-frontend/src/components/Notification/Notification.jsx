@@ -1,18 +1,12 @@
-import styles from './Notification.module.css'
+import { Alert } from '@mui/material'
 
-const Notification = ({ message, options = { type: 'error' } }) => {
-  if (!message) {
+const Notification = ({ notification }) => {
+  if (!notification) {
     return null
   }
 
-  const type = options.type === 'error' ? styles.error : styles.success
-
-  const notificationStyles = `${styles.notification} ${type}`
-
   return (
-    <>
-      <div className={notificationStyles}>{message}</div>
-    </>
+    <Alert severity={notification.type}>{notification.text}</Alert>
   )
 }
 

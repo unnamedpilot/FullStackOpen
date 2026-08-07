@@ -1,5 +1,5 @@
 import { useState } from 'react'
-
+import { TextField, Button, Box } from '@mui/material'
 export default function BlogForm({ addBlog }) {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
@@ -22,37 +22,39 @@ export default function BlogForm({ addBlog }) {
     <>
       <h2>Blog Form</h2>
       <form onSubmit={handleSubmit}>
-        <div>
-          <label>
-            title
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </label>
-        </div>
-        <div>
-          <label>
-            author
-            <input
-              type="text"
-              value={author}
-              onChange={(e) => setAuthor(e.target.value)}
-            />
-          </label>
-        </div>
-        <div>
-          <label>
-            url
-            <input
-              type="text"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-            />
-          </label>
-        </div>
-        <button type="submit">submit</button>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            rowGap: '10px',
+          }}
+        >
+          <TextField
+            label="title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            variant="outlined"
+            size="small"
+          />
+          <TextField
+            label="author"
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+            variant="outlined"
+            size="small"
+          />
+          <TextField
+            label="url"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            variant="outlined"
+            size="small"
+          />
+          <Button type="submit" variant="contained" sx={{ alignSelf: 'flex-start' }}>
+            submit
+          </Button>
+        </Box>
       </form>
     </>
   )
