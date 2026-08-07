@@ -1,15 +1,21 @@
 import { useState } from 'react'
-import { useNavigate as navigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { TextField, Button } from '@mui/material'
 
 const NoteForm = ({ onAddNote }) => {
   const [newNote, setNewNote] = useState('')
-  const handleSubmit = (event) => {
+  const navigate = useNavigate()
+  const handleSubmit = async (event) => {
     event.preventDefault()
     const note = {
       content: newNote,
       important: true,
     }
-    onAddNote(note)
+    const isValid = await onAddNote(note)
+    if (!isValid) {
+      return
+    }
+
     setNewNote('')
     navigate('/notes')
   }
@@ -17,17 +23,18 @@ const NoteForm = ({ onAddNote }) => {
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <label>
-          content
-          <input
-            value={newNote}
-            onChange={(event) => {
-              setNewNote(event.target.value)
-            }}
-          />
-        </label>
-
-        <button type="submit">submit</button>
+        <TextField
+          label="content"
+          value={newNote}
+          onChange={(event) => {
+            setNewNote(event.target.value)
+          }}
+        ></TextField>
+        <div>
+          <Button type="submit" variant="contained" style={{ marginTop: 10 }}>
+            submit
+          </Button>
+        </div>
       </form>
     </>
   )

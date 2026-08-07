@@ -1,16 +1,18 @@
-const Notification = ({ message }) => {
-  // When a component return null, it doesn't render.
-  // This is a trick to make dissapear the component.
-  if (message === null) {
+import { Alert } from '@mui/material'
+
+const Notification = ({ notification }) => {
+  if (notification === null) {
     return null
   }
 
-  return(
-    <div className="error">
-      {message}
-    </div>
+  return (
+    <Alert
+      style={{ marginTop: 10, marginBottom: 10 }}
+      severity={notification.type}
+    >
+      {notification.text}
+    </Alert>
   )
-
 }
 
 export default Notification

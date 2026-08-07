@@ -1,24 +1,23 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, Routes, Route, useMatch } from 'react-router-dom'
 import Notification from './components/Notification'
 import Footer from './components/Footer'
 import LoginForm from './components/LoginForm'
-import Togglable from './components/Togglable'
 import NoteList from './components/NoteList'
 import NoteForm from './components/NoteForm'
 import Home from './components/Home'
 import noteService from './services/notes'
 import Note from './components/Note'
+import { Container, AppBar, Toolbar, Button } from '@mui/material'
 
 const App = () => {
-  const [errorMessage, setErrorMessage] = useState(null)
+  const [notification, setNotification] = useState(null)
   const [user, setUser] = useState(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
     const user = JSON.parse(loggedUserJSON)
     return user
   })
   const [notes, setNotes] = useState([])
-  const noteFormRef = useRef()
 
   useEffect(() => {
     noteService.getAll().then((data) => setNotes(data))
@@ -30,9 +29,9 @@ const App = () => {
     }
   }, [user])
 
-  const showNotification = (message) => {
-    setErrorMessage(message)
-    setTimeout(() => setErrorMessage(null), 5000)
+  const showNotification = (notification) => {
+    setNotification(notification)
+    setTimeout(() => setNotification(null), 5000)
   }
 
   const toggleImportanceOf = (id) => {
@@ -47,9 +46,11 @@ const App = () => {
         )
       })
       .catch(() => {
-        showNotification(
-          `You can't modify the note with id ${id} because it doesn't exist`,
-        )
+        const message = {
+          text: `You can't modify the note with id ${id} because it doesn't exist`,
+          type: 'error',
+        }
+        showNotification(message)
         const notesWithoutRejected = notes.filter((note) => note.id !== id)
         setNotes(notesWithoutRejected)
       })
@@ -63,17 +64,32 @@ const App = () => {
   }
 
   const handleAddNote = async (newNote) => {
-    const data = await noteService.create(newNote)
-    setNotes(notes.concat(data))
-    noteFormRef.current.toggleVisibility()
+    try {
+      const data = await noteService.create(newNote)
+      setNotes(notes.concat(data))
+      const notification = {
+        text: `${data.content} was added`,
+        type: 'success',
+      }
+      showNotification(notification)
+      return true
+    } catch (error) {
+      if (error.status === 400) {
+        const message = { text: error.response.data.error, type: 'error' }
+        showNotification(message)
+        return false
+      }
+      throw error
+    }
   }
 
   const loginForm = () => {
+    if (user) {
+      return <div>Already logged as {user.name}</div>
+    }
     return (
       <>
-        <Togglable buttonLabel="show login">
-          <LoginForm setUser={setUser} showNotification={showNotification} />
-        </Togglable>
+        <LoginForm setUser={setUser} showNotification={showNotification} />
       </>
     )
   }
@@ -81,7 +97,6 @@ const App = () => {
   const noteList = () => {
     return (
       <>
-        <p>{user.name} is logged in</p>
         <NoteList notes={notes} />
       </>
     )
@@ -90,37 +105,36 @@ const App = () => {
   const noteForm = () => {
     return (
       <>
-        <Togglable buttonLabel="show notes" ref={noteFormRef}>
-          <NoteForm onAddNote={handleAddNote} />
-        </Togglable>
+        <NoteForm onAddNote={handleAddNote} />
       </>
     )
   }
 
-  const padding = { padding: 5 }
-
   const match = useMatch('/notes/:id')
-  const note = match
-    ? notes.find(note => note.id === match.params.id)
-    : null
+  const note = match ? notes.find((note) => note.id === match.params.id) : null
+
+  const style = { '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }
 
   return (
-    <div>
-      <Notification message={errorMessage} />
-      <div>
-        <Link style={padding} to="/">
-          home
-        </Link>
-        <Link style={padding} to="/login">
-          log in
-        </Link>
-        <Link style={padding} to="/notes">
-          notes
-        </Link>
-        <Link style={padding} to="/create">
-          new note
-        </Link>
-      </div>
+    <Container>
+      <AppBar position="static">
+        <Toolbar>
+          <Button color="inherit" component={Link} to="/" sx={style}>
+            home
+          </Button>
+          <Button color="inherit" component={Link} to="/login" sx={style}>
+            log in
+          </Button>
+          <Button color="inherit" component={Link} to="/notes" sx={style}>
+            notes
+          </Button>
+          <Button color="inherit" component={Link} to="/create" sx={style}>
+            new note
+          </Button>
+        </Toolbar>
+      </AppBar>
+
+      <Notification notification={notification} />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={loginForm()} />
@@ -137,9 +151,8 @@ const App = () => {
           }
         />
       </Routes>
-
       <Footer />
-    </div>
+    </Container>
   )
 }
 

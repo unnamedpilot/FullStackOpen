@@ -16,8 +16,11 @@ const LoginForm = ({ setUser, showNotification }) => {
       noteService.setToken(user.token)
       setUsername('')
       setPassword('')
+      const notification = { text: `Logged in successfully as ${user.username}`, type: 'success' }
+      showNotification(notification)
     } catch {
-      showNotification('wrong credentials')
+      const notification = { text: 'wrong credentials', type: 'error' }
+      showNotification(notification)
     }
   }
 
@@ -27,7 +30,7 @@ const LoginForm = ({ setUser, showNotification }) => {
       <form onSubmit={handleLogin}>
         <div>
           <label>
-              username
+            username
             <input
               type="text"
               value={username}
@@ -37,7 +40,7 @@ const LoginForm = ({ setUser, showNotification }) => {
         </div>
         <div>
           <label>
-              password
+            password
             <input
               type="text"
               value={password}

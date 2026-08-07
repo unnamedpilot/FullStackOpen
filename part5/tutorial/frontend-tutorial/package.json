@@ -12,6 +12,8 @@
     "server": "json-server --port 3001 db.json"
   },
   "dependencies": {
+    "@emotion/styled": "^11.14.1",
+    "@mui/material": "^9.3.1",
     "axios": "^1.14.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

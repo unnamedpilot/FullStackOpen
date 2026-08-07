@@ -1,6 +1,14 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import Notes from './Notes'
+import {
+  Paper,
+  TableContainer,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+} from '@mui/material'
 
 const NoteList = ({ notes }) => {
   const [showAll, setShowAll] = useState(true)
@@ -13,13 +21,28 @@ const NoteList = ({ notes }) => {
       <button onClick={() => setShowAll(!showAll)}>
         show {showAll ? 'important' : 'all'}
       </button>
-      <ul>
-        {notesToShow.map((note) => (
-          <li key={note.id}>
-            <Link to={`/notes/${note.id}`}>{note.content}</Link>
-          </li>
-        ))}
-      </ul>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Content</TableCell>
+              <TableCell>User</TableCell>
+              <TableCell>Importance</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {notesToShow.map((note) => (
+              <TableRow key={note.id}>
+                <TableCell>
+                  <Link to={`/notes/${note.id}`}>{note.content}</Link>
+                </TableCell>
+                <TableCell>{note.user.username}</TableCell>
+                <TableCell>{note.important ? 'yes' : 'no'}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </>
   )
 }
