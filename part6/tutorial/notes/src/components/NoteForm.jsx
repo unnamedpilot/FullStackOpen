@@ -3,15 +3,11 @@ import { useNotesActions } from "../store";
 const NoteForm = () => {
   const { add } = useNotesActions();
 
-  const generateId = () => (Math.random * 1000000).toFixed(0);
-
-  const addNote = (e) => {
+  const addNote = async (e) => {
     e.preventDefault();
     const content = e.target.note.value;
-    const id = generateId();
-    const note = { id, content, important: false };
-    add(note);
-    e.target.reset;
+    add(content);
+    e.target.reset();
   };
 
   return (
