@@ -1,20 +1,15 @@
-import { useAnecdoteActions } from "../store";
-
-const getId = () => (100000 * Math.random()).toFixed(0);
+import { useAnecdoteActions } from "../store/anecdotesStore";
+import { useNotificationActions } from "../store/notificationStore";
 
 const AnecdoteForm = () => {
   const { add } = useAnecdoteActions();
+  const { showNotification } = useNotificationActions();
 
   const addAnecdote = (e) => {
     e.preventDefault();
     const content = e.target.content.value;
-    const id = getId();
-    const anecdote = {
-      id,
-      content,
-      votes: 0,
-    };
-    add(anecdote);
+    add(content);
+    showNotification(`'${content}' has been added`)
     e.target.reset();
   };
 
