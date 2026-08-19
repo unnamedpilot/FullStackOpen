@@ -11,8 +11,10 @@ const useAnecdoteStore = create((set, get) => ({
       const anecdote = get().anecdotes.find(anecdote => anecdote.id === id)
       const newAnecdote = { ...anecdote, votes: anecdote.votes + 1 }
       const response = await noteService.update(id, newAnecdote)
+      console.log('------------------------------------------------------', response)
       set(state => ({
-        anecdotes: state.anecdotes.map(anecdote => anecdote.id === id ? response : anecdote)
+        anecdotes: state.anecdotes.map(anecdote => {
+          return anecdote.id === id ? response : anecdote})
       }))
     },
     add: async (content) => {
@@ -37,7 +39,12 @@ const useAnecdoteStore = create((set, get) => ({
 export const useAnecdotes = () => {
   const anecdotes = useAnecdoteStore((state) => state.anecdotes)
   const filter = useAnecdoteStore((state) => state.filter)
-  return anecdotes.filter(anecdote => anecdote.content.includes(filter))
+  const filteredAnecdotes = anecdotes.filter(anecdote => anecdote.content.includes(filter))
+  const sortedAnecdotes = filteredAnecdotes.toSorted((a , b) => b.votes - a.votes)
+  //console.log(sortedAnecdotes)
+  return sortedAnecdotes
 }
 export const useFilter = () => useAnecdoteStore(state => state.filter)
 export const useAnecdoteActions = () => useAnecdoteStore((state) => state.actions)
+
+export default useAnecdoteStore
