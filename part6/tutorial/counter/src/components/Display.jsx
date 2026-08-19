@@ -1,7 +1,7 @@
-import {useCounter} from '../State'
+import {useCounter} from '../store'
 
 const Viewer = () => {
-    const count = useCounter
+    const count = useCounter()
 
     return (
         <>{count}</>

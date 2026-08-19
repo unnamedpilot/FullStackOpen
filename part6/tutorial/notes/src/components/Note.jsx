@@ -1,7 +1,7 @@
-import { useNotesActions } from "../store"
+import { useNoteActions } from "../store"
 
 const Note = ({ note }) => {
-    const {toggleImportance} = useNotesActions()
+    const {toggleImportance} = useNoteActions()
     return (
         <li>
           {note.important ? <strong>{note.content}</strong> : note.content}

@@ -1,7 +1,7 @@
-import { useNotesActions } from "../store";
+import { useNoteActions } from "../store";
 
 const VisibilityFilter = () => {
-  const { setFilter } = useNotesActions();
+  const { setFilter } = useNoteActions();
 
   return (
     <div>

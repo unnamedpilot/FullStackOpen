@@ -1,7 +1,7 @@
-import { useNotesActions } from "../store";
+import { useNoteActions } from "../store";
 
 const NoteForm = () => {
-  const { add } = useNotesActions();
+  const { add } = useNoteActions();
 
   const addNote = async (e) => {
     e.preventDefault();
